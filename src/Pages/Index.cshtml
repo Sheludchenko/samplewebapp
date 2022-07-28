@@ -1,0 +1,78 @@
+﻿@page
+@model IndexModel
+@namespace samplewebapp.Pages
+@using System.Runtime.InteropServices
+@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
+    string name = System.Environment.GetEnvironmentVariable("SAMPLE_APP_NAME") ?? "Sample Application";
+    string message = System.Environment.GetEnvironmentVariable("SAMPLE_APP_MESSAGE") ?? "Hey, I'm a sample application!<br /><hr />&#8212; I'm running on #os.<br />&#8212; My host name is #host.<br />&#8212; #containerized <br />&#8212; I have #cores CPU cores and #memory megabytes memory available.<br />&#8212; Here's a list of my IP addresses: #ipaddresses";
+    string fontFamily = System.Environment.GetEnvironmentVariable("SAMPLE_APP_FONT_FAMILY") ?? "Merriweather";
+    string backgoundColor = System.Environment.GetEnvironmentVariable("SAMPLE_APP_BG_COLOR") ?? "#573D26";
+    string foregroundColor = System.Environment.GetEnvironmentVariable("SAMPLE_APP_FG_COLOR") ?? "#E0DBB7";
+
+    GCMemoryInfo gcInfo = GC.GetGCMemoryInfo();
+    string host = System.Net.Dns.GetHostName();
+    string memory = ( gcInfo.TotalAvailableMemoryBytes / 1024 / 1024 ).ToString();
+    string architecture = RuntimeInformation.OSArchitecture.ToString();
+    string cores = Environment.ProcessorCount.ToString();
+    string containerized = Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") is null ? "I'm NOT running in container." : "I'm running in container.";
+    string os = RuntimeInformation.OSDescription.Contains("Linux") ? "Linux" : "Windows";
+    object[] ipList = await System.Net.Dns.GetHostAddressesAsync(host);    
+    string ipaddresses = String.Join(", ", ipList);
+
+    message = message.Replace("#os", os);
+    message = message.Replace("#host", host);
+    message = message.Replace("#cores", cores);
+    message = message.Replace("#memory", memory);
+    message = message.Replace("#ipaddresses", ipaddresses);
+    message = message.Replace("#architecture", architecture);
+    message = message.Replace("#containerized", containerized);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>@name</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=@fontFamily">
+    <style type="text/css">
+        body {
+            background-color: @backgoundColor;
+            color: @foregroundColor;
+            font-family: @fontFamily, monospace;
+            font-size: 2em;
+        }
+
+        hr {
+            border: 0;
+            height: 4px;
+            margin: 30px 0;
+            background-color: @foregroundColor;
+        }
+
+        div.content {
+            top: 50%;
+            left: 50%;
+            padding: 1em;
+            position: absolute;
+            transform: translate(-50%, -50%);
+            margin-right: -50%;
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+
+    </header>
+    <div class="content">
+        <p>@Html.Raw(message)</p>
+    </div>
+    <footer>
+
+    </footer>
+</body>
+
+</html>
